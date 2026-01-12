@@ -440,35 +440,27 @@ SmartRetail/
 ## 📸 Screenshots
 
 ### Swagger Documentation
-![Swagger UI](docs/screenshots/swagger-ui.png)
+<img width="1878" height="963" alt="image" src="https://github.com/user-attachments/assets/2d8265d5-45fb-4eaf-b502-188f7924ab29" />
+
 
 ### User Dashboard
-![User Dashboard](docs/screenshots/dashboard.png)
+<img width="1919" height="1016" alt="image" src="https://github.com/user-attachments/assets/a7456efb-afe7-4fb6-a29a-a7d5cfd64a3b" />
+
 
 ### API Key Management
-![API Keys](docs/screenshots/api-keys.png)
+<img width="1184" height="451" alt="image" src="https://github.com/user-attachments/assets/3168becc-2b25-4365-8922-d13090280c82" />
 
-### Category Management
-![Categories](docs/screenshots/categories.png)
 
 ## 🎓 Kontributor
 
 **Syandi Arda**  
-NIM: [Your NIM]  
-Program Studi: [Your Program]  
+NIM: 20230140148  
+Program Studi: Teknologi Informasi  
 Mata Kuliah: Pemrograman Web Service  
 
 ## 📝 Lisensi
 
 Project ini dibuat untuk keperluan akademik (Tugas Akhir Mata Kuliah).
-
-## 🙏 Acknowledgments
-
-- Dosen Pengampu: [Nama Dosen]
-- Universitas: [Nama Universitas]
-- Referensi: Express.js, Sequelize, Swagger Documentation
-
----
 
 **Built with ❤️ for Academic Purpose**
 
