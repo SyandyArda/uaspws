@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - SmartRetail API</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <h2>🛒 SmartRetail API</h2>
+            </div>
+            <div class="nav-links">
+                <span id="userEmail" class="user-email"></span>
+                <button id="logoutBtn" class="btn-logout">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard" id="dashboardSection" style="display: none;">
+        <div class="container">
+            <!-- Welcome Section -->
+            <div class="welcome-section">
+                <h1>Welcome, <span id="userName"></span>! 👋</h1>
+                <p class="subtitle">Manage your API keys and integrate SmartRetail API into your applications</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">🔑</div>
+                    <div class="stat-content">
+                        <h3 id="totalKeys">0</h3>
+                        <p>Active API Keys</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-content">
+                        <h3>Free Tier</h3>
+                        <p>100 req/hour</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-content">
+                        <h3>Active</h3>
+                        <p>Account Status</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Keys Section -->
+            <div class="section">
+                <div class="section-header">
+                    <h2>Your API Keys</h2>
+                    <button id="generateKeyBtn" class="btn-primary">
+                        <span>+ Generate New Key</span>
+                    </button>
+                </div>
+
+                <div id="apiKeysContainer" class="api-keys-grid">
+                    <!-- API keys will be loaded here -->
+                </div>
+
+                <div id="emptyState" class="empty-state" style="display: none;">
+                    <div class="empty-icon">🔑</div>
+                    <h3>No API Keys Yet</h3>
+                    <p>Generate your first API key to start using the SmartRetail API</p>
+                    <button class="btn-primary" data-action="openGenerateModal">
+                        Generate API Key
+                    </button>
+                </div>
+            </div>
+
+            <!-- Categories Section -->
+            <div class="section">
+                <div class="section-header">
+                    <h2>📂 Product Categories</h2>
+                    <button id="addCategoryBtn" class="btn-primary">
+                        <span>+ Add Category</span>
+                    </button>
+                </div>
+
+                <div id="categoriesContainer" class="categories-grid">
+                    <!-- Categories will be loaded here -->
+                </div>
+
+                <div id="categoriesEmptyState" class="empty-state" style="display: none;">
+                    <div class="empty-icon">📂</div>
+                    <h3>No Categories Yet</h3>
+                    <p>Create your first category to organize your products</p>
+                    <button class="btn-primary" data-action="openAddCategoryModal">
+                        Add Category
+                    </button>
+                </div>
+            </div>
+
+            <!-- API Testing Section -->
+            <div class="section">
+                <h2>🧪 API Testing</h2>
+                <p class="subtitle">Test your API endpoints directly from the dashboard</p>
+
+                <!-- Tabs -->
+                <div class="api-tabs">
+                    <button class="tab-btn active" data-tab="products">📦 Products</button>
+                    <button class="tab-btn" data-tab="transactions">💳 Transactions</button>
+                </div>
+
+                <!-- API Key Selector -->
+                <div class="api-auth-section">
+                    <div class="auth-selector">
+                        <label for="selectedApiKey">🔑 Authentication Method:</label>
+                        <select id="selectedApiKey" onchange="updateAuthDisplay()">
+                            <option value="auto">Auto (Use first API key)</option>
+                            <option value="jwt">JWT Token (Temporary)</option>
+                        </select>
+                    </div>
+                    <div id="authIndicator" class="auth-indicator">
+                        <span class="auth-status">Loading...</span>
+                    </div>
+                </div>
+
+                <!-- Products Tab -->
+                <div id="productsTab" class="tab-content active">
+                    <!-- List Products -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge get">GET</span>
+                            <span class="endpoint-path">/api/v1/products</span>
+                        </div>
+                        <p>List all products with pagination</p>
+                        <div class="endpoint-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Page</label>
+                                    <input type="number" id="listProductsPage" value="1" min="1">
+                                </div>
+                                <div class="form-group">
+                                    <label>Per Page</label>
+                                    <input type="number" id="listProductsPerPage" value="20" min="1">
+                                </div>
+                            </div>
+                            <button class="btn-test" data-action="listProducts">Test Endpoint</button>
+                        </div>
+                    </div>
+
+                    <!-- Create Product -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge post">POST</span>
+                            <span class="endpoint-path">/api/v1/products</span>
+                        </div>
+                        <p>Create a new product</p>
+                        <div class="endpoint-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>SKU</label>
+                                    <input type="text" id="createProductSku" placeholder="PROD-001">
+                                </div>
+                                <div class="form-group">
+                                    <label>Name *</label>
+                                    <input type="text" id="createProductName" placeholder="Product Name" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Price *</label>
+                                    <input type="number" id="createProductPrice" placeholder="100000" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>Stock</label>
+                                    <input type="number" id="createProductStock" placeholder="10" value="0">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <select id="createProductCategory">
+                                        <option value="">-- No Category --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Low Stock Threshold</label>
+                                    <input type="number" id="createProductThreshold" placeholder="10" value="10">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea id="createProductDescription" placeholder="Product description"
+                                    rows="2"></textarea>
+                            </div>
+                            <button class="btn-test" data-action="createProduct">Create Product</button>
+                        </div>
+                    </div>
+
+                    <!-- Search Products -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge get">GET</span>
+                            <span class="endpoint-path">/api/v1/products/search</span>
+                        </div>
+                        <p>Search products by name or SKU</p>
+                        <div class="endpoint-form">
+                            <div class="form-group">
+                                <label>Search Query</label>
+                                <input type="text" id="searchProductsQuery" placeholder="Enter product name or SKU">
+                            </div>
+                            <button class="btn-test" data-action="searchProducts">Search</button>
+                        </div>
+                    </div>
+
+                    <!-- Get Product by ID -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge get">GET</span>
+                            <span class="endpoint-path">/api/v1/products/{id}</span>
+                        </div>
+                        <p>Get a specific product by ID</p>
+                        <div class="endpoint-form">
+                            <div class="form-group">
+                                <label>Product ID</label>
+                                <input type="number" id="getProductId" placeholder="1">
+                            </div>
+                            <button class="btn-test" data-action="getProduct">Get Product</button>
+                        </div>
+                    </div>
+
+                    <!-- Update Product -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge put">PUT</span>
+                            <span class="endpoint-path">/api/v1/products/{id}</span>
+                        </div>
+                        <p>Update an existing product</p>
+                        <div class="endpoint-form">
+                            <div class="form-group">
+                                <label>Product ID *</label>
+                                <input type="number" id="updateProductId" placeholder="1" required>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Name</label>
+                                    <input type="text" id="updateProductName" placeholder="Updated Name">
+                                </div>
+                                <div class="form-group">
+                                    <label>Price</label>
+                                    <input type="number" id="updateProductPrice" placeholder="150000">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Stock</label>
+                                    <input type="number" id="updateProductStock" placeholder="20">
+                                </div>
+                                <div class="form-group">
+                                    <label>Category</label>
+                                    <select id="updateProductCategory">
+                                        <option value="">-- No Category --</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="btn-test" data-action="updateProduct">Update Product</button>
+                        </div>
+                    </div>
+
+                    <!-- Update Stock -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge patch">PATCH</span>
+                            <span class="endpoint-path">/api/v1/products/{id}/stock</span>
+                        </div>
+                        <p>Update product stock quantity</p>
+                        <div class="endpoint-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Product ID *</label>
+                                    <input type="number" id="updateStockId" placeholder="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>New Stock *</label>
+                                    <input type="number" id="updateStockQuantity" placeholder="50" required>
+                                </div>
+                            </div>
+                            <button class="btn-test" data-action="updateStock">Update Stock</button>
+                        </div>
+                    </div>
+
+                    <!-- Delete Product -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge delete">DELETE</span>
+                            <span class="endpoint-path">/api/v1/products/{id}</span>
+                        </div>
+                        <p>Delete a product</p>
+                        <div class="endpoint-form">
+                            <div class="form-group">
+                                <label>Product ID</label>
+                                <input type="number" id="deleteProductId" placeholder="1">
+                            </div>
+                            <button class="btn-test btn-danger" data-action="deleteProduct">Delete Product</button>
+                        </div>
+                    </div>
+
+                    <!-- Low Stock Products -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge get">GET</span>
+                            <span class="endpoint-path">/api/v1/products/low-stock</span>
+                        </div>
+                        <p>Get products with low stock</p>
+                        <div class="endpoint-form">
+                            <button class="btn-test" data-action="getLowStockProducts">Get Low Stock</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transactions Tab -->
+                <div id="transactionsTab" class="tab-content">
+                    <!-- List Transactions -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge get">GET</span>
+                            <span class="endpoint-path">/api/v1/transactions</span>
+                        </div>
+                        <p>List all transactions with pagination</p>
+                        <div class="endpoint-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Page</label>
+                                    <input type="number" id="listTransactionsPage" value="1" min="1">
+                                </div>
+                                <div class="form-group">
+                                    <label>Per Page</label>
+                                    <input type="number" id="listTransactionsPerPage" value="20" min="1">
+                                </div>
+                            </div>
+                            <button class="btn-test" data-action="listTransactions">Test Endpoint</button>
+                        </div>
+                    </div>
+
+                    <!-- Create Transaction -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge post">POST</span>
+                            <span class="endpoint-path">/api/v1/transactions</span>
+                        </div>
+                        <p>Create a new transaction</p>
+                        <div class="endpoint-form">
+                            <div class="form-group">
+                                <label>Items (JSON Array) *</label>
+                                <textarea id="createTransactionItems" rows="4"
+                                    placeholder='[{"product_id": 1, "quantity": 2, "unit_price": 100000}]'
+                                    required></textarea>
+                                <small>Format: [{"product_id": 1, "quantity": 2, "unit_price": 100000}]</small>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Payment Method</label>
+                                    <select id="createTransactionPayment">
+                                        <option value="cash">Cash</option>
+                                        <option value="card">Card</option>
+                                        <option value="transfer">Transfer</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Notes</label>
+                                    <input type="text" id="createTransactionNotes" placeholder="Optional notes">
+                                </div>
+                            </div>
+                            <button class="btn-test" data-action="createTransaction">Create Transaction</button>
+                        </div>
+                    </div>
+
+                    <!-- Get Transaction by ID -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge get">GET</span>
+                            <span class="endpoint-path">/api/v1/transactions/{id}</span>
+                        </div>
+                        <p>Get a specific transaction by ID</p>
+                        <div class="endpoint-form">
+                            <div class="form-group">
+                                <label>Transaction ID</label>
+                                <input type="number" id="getTransactionId" placeholder="1">
+                            </div>
+                            <button class="btn-test" data-action="getTransaction">Get Transaction</button>
+                        </div>
+                    </div>
+
+                    <!-- Daily Summary -->
+                    <div class="endpoint-card">
+                        <div class="endpoint-header">
+                            <span class="method-badge get">GET</span>
+                            <span class="endpoint-path">/api/v1/transactions/daily-summary</span>
+                        </div>
+                        <p>Get daily transaction summary</p>
+                        <div class="endpoint-form">
+                            <div class="form-group">
+                                <label>Date (optional)</label>
+                                <input type="date" id="dailySummaryDate">
+                            </div>
+                            <button class="btn-test" data-action="getDailySummary">Get Summary</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Response Display -->
+                <div class="response-container">
+                    <div class="response-header">
+                        <h3>Response</h3>
+                        <div class="response-actions">
+                            <span id="responseStatus" class="status-badge"></span>
+                            <button class="btn-copy-small" data-action="copyResponse"
+                                style="display: none;">Copy</button>
+                        </div>
+                    </div>
+                    <pre id="responseDisplay"
+                        class="response-display"><code>Make a request to see the response here...</code></pre>
+                </div>
+            </div>
+
+            <!-- Quick Start Guide -->
+            <div class="section">
+                <h2>Quick Start Guide</h2>
+                <div class="guide-grid">
+                    <div class="guide-card">
+                        <div class="guide-number">1</div>
+                        <h3>Generate API Key</h3>
+                        <p>Click "Generate New Key" to create your API key for authentication</p>
+                    </div>
+                    <div class="guide-card">
+                        <div class="guide-number">2</div>
+                        <h3>Copy Your Key</h3>
+                        <p>Click the copy button to copy your API key to clipboard</p>
+                    </div>
+                    <div class="guide-card">
+                        <div class="guide-number">3</div>
+                        <h3>Make API Calls</h3>
+                        <p>Use your API key in the X-API-Key header for all requests</p>
+                    </div>
+                </div>
+
+                <div class="code-example">
+                    <h3>Example Request</h3>
+                    <pre><code>curl -X GET http://localhost:3000/api/v1/products \
+  -H "X-API-Key: YOUR_API_KEY_HERE"</code></pre>
+                </div>
+
+                <div class="links-section">
+                    <a href="/api-docs" target="_blank" class="link-card">
+                        <span>📚</span>
+                        <div>
+                            <h4>API Documentation</h4>
+                            <p>Interactive Swagger docs</p>
+                        </div>
+                    </a>
+                    <a href="/" class="link-card">
+                        <span>🏠</span>
+                        <div>
+                            <h4>Homepage</h4>
+                            <p>Back to landing page</p>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Login/Register Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <h2 id="authTitle">Welcome to SmartRetail API</h2>
+            <p class="modal-subtitle">Sign in to manage your API keys</p>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="loginUsername" required placeholder="Enter your username">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required placeholder="Enter your password">
+                </div>
+                <div id="loginError" class="error-message"></div>
+                <button type="submit" class="btn-primary btn-block">Sign In</button>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="auth-form" style="display: none;">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="registerEmail" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" id="registerUsername" required placeholder="Choose a username">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="registerPassword" required placeholder="Min. 8 characters">
+                </div>
+                <div class="form-group">
+                    <label>Store Name</label>
+                    <input type="text" id="registerStoreName" required placeholder="Your store name">
+                </div>
+                <div id="registerError" class="error-message"></div>
+                <button type="submit" class="btn-primary btn-block">Create Account</button>
+            </form>
+
+            <div class="auth-toggle">
+                <span id="toggleText">Don't have an account?</span>
+                <a href="#" id="toggleAuth">Sign up</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generate Key Modal -->
+    <div id="generateModal" class="modal" style="display: none;">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>Generate New API Key</h3>
+                <button class="modal-close" data-action="closeGenerateModal">&times;</button>
+            </div>
+            <form id="generateForm">
+                <div class="form-group">
+                    <label>Key Name</label>
+                    <input type="text" id="keyName" required placeholder="e.g., Production Key">
+                    <small>Give your API key a memorable name</small>
+                </div>
+                <div class="form-group">
+                    <label>Expires In (Days)</label>
+                    <input type="number" id="expiresInDays" min="1" placeholder="365 (optional)">
+                    <small>Leave empty for no expiration</small>
+                </div>
+                <div id="generateError" class="error-message"></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" data-action="closeGenerateModal">Cancel</button>
+                    <button type="submit" class="btn-primary">Generate Key</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal" style="display: none;">
+        <div class="modal-content modal-small">
+            <div class="success-icon">✅</div>
+            <h3>API Key Generated!</h3>
+            <p>Your new API key has been created. Make sure to copy it now - you won't be able to see it again!</p>
+            <div class="api-key-display">
+                <code id="newApiKey"></code>
+                <button class="btn-copy" data-action="copyNewKey">Copy</button>
+            </div>
+            <button class="btn-primary btn-block" data-action="closeSuccessModal">Done</button>
+        </div>
+    </div>
+
+    <!-- Category Modal -->
+    <div id="categoryModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="categoryModalTitle">Add Category</h3>
+                <button class="modal-close" data-action="closeCategoryModal">×</button>
+            </div>
+            <form id="categoryForm">
+                <input type="hidden" id="categoryId" value="">
+                <div class="form-group">
+                    <label for="categoryName">Category Name *</label>
+                    <input type="text" id="categoryName" required maxlength="100" placeholder="e.g., Electronics">
+                </div>
+                <div class="form-group">
+                    <label for="categoryDescription">Description</label>
+                    <textarea id="categoryDescription" rows="3" placeholder="Optional description"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="categoryImage">Image URL</label>
+                    <input type="url" id="categoryImage" placeholder="https://example.com/image.jpg">
+                </div>
+                <div id="categoryError" class="error-message"></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn-secondary" data-action="closeCategoryModal">Cancel</button>
+                    <button type="submit" class="btn-primary" id="saveCategoryBtn">Save Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>
